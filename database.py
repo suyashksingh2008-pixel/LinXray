@@ -59,3 +59,22 @@ def get_history():
     a=cursor.fetchall()
     connection.close()
     return a
+def streamlit_to_scanner_create():
+    con=sqlite3.connect(Database_file)
+    c=con.cursor()
+    query=("""CREATE TABLE IF NOT EXISTS TO_SCANS (
+    USERNAME TEXT NOT NULL,
+    TARGET_URL TEXT NOT NULL)""")
+    c.execute(query)
+    con.commit()
+    con.close()
+
+
+def streamlit_to_scanner_save(username,target_url):
+    con=sqlite3.connect(Database_file)
+    c=con.cursor()
+    query=("""INSERT INTO TO_SCANS (USERNAME,TARGET_URL) VALUES (?,?)""")
+    c.execute(query,(username,target_url))
+    con.commit()
+    con.close()
+
