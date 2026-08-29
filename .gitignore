@@ -1,0 +1,14 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# System & OS files
+.DS_Store
+
+# Streamlit config (if you are using Streamlit)
+!.streamlit/config.toml
+EOF
