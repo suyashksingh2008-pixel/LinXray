@@ -27,8 +27,10 @@ def run_scan(target_url: str, output_root: Path = Path("evidence_folder")) -> Pa
 
     output_root.mkdir(parents=True, exist_ok=True)
     output_root = output_root.resolve()
+    analyze_ss.mkdir(parents=True, exist_ok=True)
+    analyze_ss = analyze_ss.resolve()
 
-    host_evidence_folder = (output_root / scan_id)
+    host_evidence_folder = (output_root / analyze_ss)
 
     command = ["docker",
             "run",
