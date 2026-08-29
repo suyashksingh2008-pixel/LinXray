@@ -117,6 +117,9 @@ if st.session_state.get("authentication_status"):
         Clean_window=json.load(f)
 
     Suyash=Image.open("assets/Suyash.png")
+    Jonathan=Image.open("assets/jnthn.png")
+    Ayush=Image.open("assets/aysh.png")
+    Gauresh=Image.open("assets/grs.png")
     # Left to right Sidebar Gradient
     st.markdown(
         """
@@ -222,18 +225,58 @@ if st.session_state.get("authentication_status"):
     cl11,space1,cl12=st.columns([2,2.5,3])
     with cl11:
         st.image(Suyash)
+        st.image(Jonathan)
+        st.image(Ayush)
+        st.image(Gauresh)
     with cl12:
-        st.markdown("<div style='width: 100px;'></div>", unsafe_allow_html=True)
+        st.space(10)
         st.markdown("""
-            <h3 style="
-                white-space: nowrap; 
-                margin-top: 10px; 
-                font-size: 1.5rem;
-            ">
-                Suyash Kumar Singh
-            </h3>
+                    <div style="display:flex; align-items:baseline;gap:15px;flex-wrap:wrap;margin-top:10px;">
+                        <h3 style="white-space: nowrap; margin: 0; font-size: 1.5rem;">
+                            <a href="https://www.linkedin.com/in/jonathan-karan-kamal-690766229/"
+                                style="color: #00FFE5; text-decoration: underline;">
+                                 Suyash Kumar Singh
+                            </a>
+                        </h3>
+                        <span style="font-size: 1.1rem; color: inherit;">Database Management</span>
+                    </div>
+                """, unsafe_allow_html=True)
+        st.space(85)
+        st.markdown("""
+            <div style="display:flex; align-items:baseline;gap:15px;flex-wrap:wrap;margin-top:10px;">
+                <h3 style="white-space: nowrap; margin: 0; font-size: 1.5rem;">
+                    <a href="https://www.linkedin.com/in/jonathan-karan-kamal-690766229/"
+                        style="color: #00FFE5; text-decoration: underline;">
+                         Jonathan Karan Kamal
+                    </a>
+                </h3>
+                <span style="font-size: 1.1rem; color: inherit;">Virtual Environment Testing and Isolation</span>
+            </div>
         """, unsafe_allow_html=True)
-        st.write("Database Management")
+        st.space(57)
+        st.markdown("""
+                    <div style="display:flex; align-items:baseline;gap:15px;flex-wrap:wrap;margin-top:10px;">
+                        <h3 style="white-space: nowrap; margin: 0; font-size: 1.5rem;">
+                            <a href="https://www.linkedin.com/in/ayush-kumar-436690423/"
+                                style="color: #00FFE5; text-decoration: underline;">
+                                 Ayush Kumar
+                            </a>
+                        </h3>
+                        <span style="font-size: 1.1rem; color: inherit;">Threat Intelligence System</span>
+                    </div>
+                """, unsafe_allow_html=True)
+        st.space(60)
+        st.markdown("""
+                            <div style="display:flex; align-items:baseline;gap:15px;flex-wrap:wrap;margin-top:10px;">
+                                <h3 style="white-space: nowrap; margin: 0; font-size: 1.5rem;">
+                                    <a href="https://www.linkedin.com/in/gauresh-bhatia-773950428/"
+                                        style="color: #00FFE5; text-decoration: underline;">
+                                         Gauresh Nitin Bhatia
+                                    </a>
+                                </h3>
+                                <span style="font-size: 1.1rem; color: inherit;">UI/UX & Front End</span>
+                            </div>
+                        """, unsafe_allow_html=True)
 
 # If login failed
 elif st.session_state.get("authentication_status") is False:
