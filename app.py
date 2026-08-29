@@ -101,7 +101,7 @@ if st.session_state.get("authentication_status"):
         """
         <style>
         [data-testid="stSidebar"] {
-            background: linear-gradient(to right, #2C325B, #2C325B07);
+            background: linear-gradient(to right, #2C325B, #2C325B10);
         }
         /* Optional: Ensure text color inside sidebar remains readable on dark gradients */
         [data-testid="stSidebar"] * {
@@ -121,9 +121,6 @@ if st.session_state.get("authentication_status"):
     st.markdown("""
     <div style="text-align: center;">
         <h1 style="
-            background: linear-gradient(90deg, #ffffff, #ffffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             font-family: 'Orbitron',sans-serif;
             font-size: 5rem;
             white-space: nowrap; /* <-- Prevents the text from breaking into two lines */
@@ -146,8 +143,10 @@ if st.session_state.get("authentication_status"):
             border: none;
             height: 3px;
             background-color: #b32121;
-            width: 100%;
-            margin: 0 auto;
+            width: 150%;
+            margin-left: -25%;
+            margin-top: 20px;
+            margin-bottom: 20px;
         ">
     """, unsafe_allow_html=True)
 
@@ -156,10 +155,8 @@ if st.session_state.get("authentication_status"):
     st.markdown("""
         <div1 style="text-align: center;">
             <h2 style="
-                background: linear-gradient(90deg,#3366ff, #97026a);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
                 font-family: monospace;
+                white-space: nowrap;
                 display: inline-block;
             ">
                 Your Scan Results will Appear Here
@@ -185,7 +182,17 @@ elif st.session_state.get("authentication_status") is None:
     if st.session_state["auth_mode"] == "Login":
         st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
         authenticator.login(location="main", key="unique_login_form")
-        st.markdown("---")
+        st.space(10)
+        st.markdown("""
+                <hr style="
+                    border: none;
+                    height: 3px;
+                    background-color: #3F4464;
+                    width: 100%;
+                    margin: 0 auto;
+                ">
+            """, unsafe_allow_html=True)
+        st.space(20)
         if st.button("Need an account? Sign Up", use_container_width=True):
             st.session_state["auth_mode"] = "Sign Up"
             st.rerun()
