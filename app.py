@@ -210,7 +210,7 @@ elif st.session_state.get("authentication_status") is None:
             if not new_username or not new_password or not new_name:
                 st.warning("Please fill out all required fields.")
             else:
-                hashed_pw = stauth.Hasher([new_password]).generate()[0]
+                hashed_pw = stauth.Hasher.hash(new_password)
                 if register_user_in_db(new_username, new_name, hashed_pw):
                     st.success("Account created! Switch back to Login to sign in.")
                 else:
