@@ -76,6 +76,18 @@ if "auth_mode" not in st.session_state:
 
 
 #check for login state
+st.markdown(
+    """
+    <style>
+    /* Custom border thickness and color for the login box */
+    [data-testid="stForm"] {
+        border: 3px solid #b32121 !important;
+        border-radius: 12px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 authenticator.login(location="main")
 
 # If user is logged in
@@ -92,17 +104,16 @@ elif st.session_state.get("authentication_status") is False:
 elif st.session_state.get("authentication_status") is None:
     st.markdown("---")
     
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Need an account? Sign Up", use_container_width=True):
+    if st.session_state["auth_mode"] == "Login":
+        if st.button("Need an account? Sign Up", use_container_width=True, type='primary'):
             st.session_state["auth_mode"] = "Sign Up"
             st.rerun()
-    with col2:
+            
+    elif st.session_state["auth_mode"] == "Sign Up":
         if st.button("Already have an account? Login", use_container_width=True):
             st.session_state["auth_mode"] = "Login"
             st.rerun()
-
-    if st.session_state["auth_mode"] == "Sign Up":
+            
         st.subheader("Create a New Account")
         with st.form("signup_form"):
             new_name = st.text_input("Full Name")
@@ -114,10 +125,8 @@ elif st.session_state.get("authentication_status") is None:
             if not new_username or not new_password or not new_name:
                 st.warning("Please fill out all required fields.")
             else:
-                # Correct hashing syntax for streamlit-authenticator
                 hashed_pw = stauth.Hasher([new_password]).generate()[0]
-                
                 if register_user_in_db(new_username, new_name, hashed_pw):
-                    st.success("Account created! Switch back to Login to sign in.")
+                    st.success("Account created! Click Login above to sign in.")
                 else:
                     st.error("Username already exists or database error.")

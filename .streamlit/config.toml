@@ -1,5 +1,6 @@
---text: #dbfff7;
---background: #1A11d3e;
---primary: #7cfee3;
---secondary: #0139ad;
---accent: #2f25fe;
+[theme]
+primaryColor = "#b32121"
+backgroundColor = "#1A1D3E"
+secondaryBackgroundColor = "#2C325B"
+textColor = "#dbfff7"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
