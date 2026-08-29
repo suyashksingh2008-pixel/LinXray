@@ -3,10 +3,22 @@ import subprocess
 from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
+import sqlite3
 
 DOCKER_IMAGE = "linxray-dispscanner:latest"
 
 SCAN_TIMEOUT_TIME = 360
+
+
+def fetch_target_url():
+    name=input('enter username...')
+    con=sqlite3.connect(Database_file)
+    query=('''SELECT TARGET_URL FROM TO_SCANS WHERE USERNAME='{}'
+'''.format(name))
+    c=con.cursor()
+    return c.execute(query).fetchall()
+
+
 
 def validate_basic_url(target_url: str) -> str:
     target_url = target_url.strip()
