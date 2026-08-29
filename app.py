@@ -92,12 +92,14 @@ if st.session_state.get("authentication_status"):
     #Loading assets
     with open("assets/Clean_Window.json","r",encoding="utf-8") as f:
         Clean_window=json.load(f)
+
+    Suyash=Image.open("assets/Suyash.png")
     # Left to right Sidebar Gradient
     st.markdown(
         """
         <style>
         [data-testid="stSidebar"] {
-            background: linear-gradient(to right, #2C325B, #2C325B10);
+            background: linear-gradient(to right, #2C325B, #2C325B00);
         }
         /* Optional: Ensure text color inside sidebar remains readable on dark gradients */
         [data-testid="stSidebar"] * {
@@ -111,18 +113,19 @@ if st.session_state.get("authentication_status"):
      # Main page content
      #Sidebar
     authenticator.logout("Logout", "sidebar")
-    st.sidebar.write(f"Welcome, *{st.session_state['name']}*!")
+    st.sidebar.write(f"Welcome, {st.session_state['username']}!")
 
     # Header
     st.markdown("""
-    <div style="text-align: center;">
+    <div style="text-align: center; width: 100%;">
         <h1 style="
-            font-family: 'Orbitron',sans-serif;
-            font-size: 5rem;
-            white-space: nowrap; /* <-- Prevents the text from breaking into two lines */
-            display: inline-block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            display: block;
+            width: 100%;
+            margin: 0 auto;
         ">
-            Welcome to LinXray
+        Welcome to LinXray
         </h1>
     </div>
     """, unsafe_allow_html=True)
@@ -131,7 +134,7 @@ if st.session_state.get("authentication_status"):
     with c2:
         target_url = st.text_input("Enter URL", placeholder="https://example.com", label_visibility="collapsed")
     
-    st.space(40)
+    st.space(20)
     
     # Custom colored and extended divider line
     st.markdown("""
@@ -147,18 +150,60 @@ if st.session_state.get("authentication_status"):
     """, unsafe_allow_html=True)
 
     # Scan Results
-    st.space(30)
     st.markdown("""
-        <div1 style="text-align: center;">
-            <h2 style="
-                font-family: monospace;
-                white-space: nowrap;
+        <div style="text-align: center; width: 100%;">
+            <h1 style="
+                font-family: 'Orbitron', sans-serif;
+                font-size: 3rem;
+                display: block;
+                width: 100%;
+                margin: 0 auto;
+            ">
+            Analysis Results
+            </h1>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    #Coloured divider
+    st.markdown("""
+        <hr style="
+            border: none;
+            height: 3px;
+            background-color: #b32121;
+            width: 150%;
+            margin-left: -25%;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        ">
+    """, unsafe_allow_html=True)
+    #Meet the Team
+    st.markdown("""
+        <div style="text-align: center;">
+            <h1 style="
+                font-family: 'Orbitron',sans-serif;
+                font-size: 2.5rem;
+                white-space: nowrap; /* <-- Prevents the text from breaking into two lines */
                 display: inline-block;
             ">
-                Your Scan Results will Appear Here
-            </h2>
-        </div1>
+            Meet the Team!
+            </h1>
+        </div>
         """, unsafe_allow_html=True)
+    cl11,space1,cl12=st.columns([2,2.5,3])
+    with cl11:
+        st.image(Suyash)
+    with cl12:
+        st.markdown("<div style='width: 100px;'></div>", unsafe_allow_html=True)
+        st.markdown("""
+            <h3 style="
+                white-space: nowrap; 
+                margin-top: 10px; 
+                font-size: 1.5rem;
+            ">
+                Suyash Kumar Singh
+            </h3>
+        """, unsafe_allow_html=True)
+        st.write("Database Management")
 
 # If login failed
 elif st.session_state.get("authentication_status") is False:
