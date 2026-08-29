@@ -5,10 +5,10 @@ from streamlit_lottie import st_lottie
 from PIL import Image
 import sqlite3
 
-#Page Title
+# Page Title
 st.set_page_config(page_title="LinXray", page_icon="assets/logo.png")
 
-#Database Functions for URL queue
+# Database Functions for URL queue
 def streamlit_to_scanner_create():
     con = sqlite3.connect("users.db")
     c = con.cursor()
@@ -31,7 +31,7 @@ def streamlit_to_scanner_save(username, target_url):
 # Initialize scan queue table on startup
 streamlit_to_scanner_create()
 
-#Login
+# Login
 def User_Login():
     """Fetches users from SQLite and guarantees the test user works."""
     credentials = {"usernames": {}}
@@ -75,7 +75,7 @@ def register_user_in_db(username, name, hashed_password):
     except Exception:
         return False
 
-#Saving cookie of user being logged in
+# Saving cookie of user being logged in
 credentials = User_Login()
 
 authenticator = stauth.Authenticate(
@@ -85,7 +85,7 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=30
 )
 
-#Login Page state initialization
+# Login Page state initialization
 if "auth_mode" not in st.session_state:
     st.session_state["auth_mode"] = "Login"
 
@@ -112,14 +112,15 @@ st.markdown(
 
 # If user is logged in
 if st.session_state.get("authentication_status"):
-    #Loading assets
+    # Loading assets
     with open("assets/Clean_Window.json","r",encoding="utf-8") as f:
-        Clean_window=json.load(f)
+        Clean_window = json.load(f)
 
-    Suyash=Image.open("assets/Suyash.png")
-    Jonathan=Image.open("assets/jnthn.png")
-    Ayush=Image.open("assets/aysh.png")
-    Gauresh=Image.open("assets/grs.png")
+    Suyash = Image.open("assets/Suyash.png")
+    Jonathan = Image.open("assets/jnthn.png")
+    Ayush = Image.open("assets/aysh.png")
+    Gauresh = Image.open("assets/grs.png")
+    
     # Left to right Sidebar Gradient
     st.markdown(
         """
@@ -132,8 +133,8 @@ if st.session_state.get("authentication_status"):
         unsafe_allow_html=True
     )
     
-     # Main page content
-     #Sidebar
+    # Main page content
+    # Sidebar
     authenticator.logout("Logout", "sidebar")
     st.sidebar.write(f"Welcome, {st.session_state['name']}!")
 
@@ -153,6 +154,10 @@ if st.session_state.get("authentication_status"):
     """, unsafe_allow_html=True)
     st.space(30)
     
+    # Initialize the results visibility flag in session state if not present
+    if "show_results" not in st.session_state:
+        st.session_state["show_results"] = False
+
     c1, c2, c3 = st.columns([0.5, 3, 0.5])
     with c2:
         with st.form("url_scan_form", clear_on_submit=False):
@@ -163,13 +168,67 @@ if st.session_state.get("authentication_status"):
             if target_url.strip():
                 current_username = st.session_state.get("username")
                 streamlit_to_scanner_save(current_username, target_url)
-                st.success(f"URL submitted for scanning: {target_url}") #Replace this with Loading animation
+                st.session_state["show_results"] = True  # Reveals the results section
+                st.success(f"URL submitted for scanning: {target_url}")
             else:
                 st.warning("Please enter a valid URL.")
-    
+
+    # --- ANALYSIS RESULTS SECTION (Only shows after submit) ---
+    if st.session_state.get("show_results"):
+        st.space(20)
+        
+        st.markdown("""
+            <hr style="
+                border: none;
+                height: 3px;
+                background-color: #b32121;
+                width: 150%;
+                margin-left: -25%;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            ">
+        """, unsafe_allow_html=True)
+
+        st.markdown("""
+            <div style="text-align: center; width: 100%;">
+                <h1 style="
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 3rem;
+                    display: block;
+                    width: 100%;
+                    margin: 0 auto;
+                ">
+                Analysis Results
+                </h1>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("""
+            <hr style="
+                border: none;
+                height: 3px;
+                background-color: #b32121;
+                width: 150%;
+                margin-left: -25%;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            ">
+        """, unsafe_allow_html=True)
+
+        st.subheader("Deceptive elements:")
+        st.write("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero.")
+
+        st.subheader("Phishing & Behavioral Indicators:")
+        st.write("Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.")
+
+        st.subheader("Final Risk Assessment:")
+        st.write("Risk Index : x/100 (Benign/wtvr)")
+        st.write("Threat Classification : (Clean/Infected)")
+        st.write("Recommended Action : (wtvr)")
+
     st.space(20)
     
-    # Custom colored and extended divider line
+    # Custom colored and extended divider line for Meet the Team section
     st.markdown("""
         <hr style="
             border: none;
@@ -182,47 +241,21 @@ if st.session_state.get("authentication_status"):
         ">
     """, unsafe_allow_html=True)
 
-    # Scan Results
-    st.markdown("""
-        <div style="text-align: center; width: 100%;">
-            <h1 style="
-                font-family: 'Orbitron', sans-serif;
-                font-size: 3rem;
-                display: block;
-                width: 100%;
-                margin: 0 auto;
-            ">
-            Analysis Results
-            </h1>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    #Coloured divider
-    st.markdown("""
-        <hr style="
-            border: none;
-            height: 3px;
-            background-color: #b32121;
-            width: 150%;
-            margin-left: -25%;
-            margin-top: 20px;
-            margin-bottom: 20px;
-        ">
-    """, unsafe_allow_html=True)
-    #Meet the Team
+    # Meet the Team
     st.markdown("""
         <div style="text-align: center;">
             <h1 style="
                 font-family: 'Orbitron',sans-serif;
                 font-size: 2.5rem;
-                white-space: nowrap; /* <-- Prevents the text from breaking into two lines */
+                white-space: nowrap; 
                 display: inline-block;
             ">
             Meet the Team!
             </h1>
         </div>
         """, unsafe_allow_html=True)
-    cl11,space1,cl12=st.columns([2,2.5,3])
+        
+    cl11, space1, cl12 = st.columns([2, 2.5, 3])
     with cl11:
         st.image(Suyash)
         st.image(Jonathan)
