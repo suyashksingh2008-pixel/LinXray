@@ -6,7 +6,7 @@ client = genai.Client(api_key='')
 
 # 2. Load the screenshot captured by your Playwright sandbox
 # Make sure you have an image named 'screenshot.png' in your folder
-screenshot = PIL.Image.open(r"C:\Users\l0stf\OneDrive\Desktop\screenshot.png.png")
+screenshot = PIL.Image.open(r"C:\Users\xx\OneDrive\Desktop\screenshot.png.png")
 
 
 prompt = """
