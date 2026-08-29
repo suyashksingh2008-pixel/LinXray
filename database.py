@@ -45,7 +45,8 @@ def save_scan(report):
 def get_scan_history():
     con=sqlite3.connect(Database_file)
     c=con.cursor()
-    c.execute("SELECT * FROM SCANS")
+    name=input('enter the username....')
+    c.execute("SELECT * FROM SCANS WHERE USERNAME='{}'".format(name))
     rows=c.fetchall()
     con.close()
     return rows
