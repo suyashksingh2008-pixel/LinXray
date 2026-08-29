@@ -45,17 +45,36 @@ def save_scan(report):
 def get_scan_history():
     con=sqlite3.connect(Database_file)
     c=con.cursor()
-    c.execute("SELECT * FROM SCANS")
+    name=input('enter the username....')
+    c.execute("SELECT * FROM SCANS WHERE USERNAME='{}'".format(name))
     rows=c.fetchall()
     con.close()
     return rows
 
 def get_history():
     n=input('enter user name....')
-    connection=sqlite3.connect(DATABASE_FILE)
+    connection=sqlite3.connect(Database_file)
     cursor=connection.cursor()
     cursor.execute(''' SELECT scan_id,final_url,risk_index,created_at FROM scans WHERE username='{}'
     '''.format(n))
     a=cursor.fetchall()
     connection.close()
     return a
+def streamlit_to_scanner_create():
+    con=sqlite3.connect(Database_file)
+    c=con.cursor()
+    query=("""CREATE TABLE IF NOT EXISTS TO_SCANS (
+    USERNAME TEXT NOT NULL,
+    TARGET_URL TEXT NOT NULL)""")
+    c.execute(query)
+    con.commit()
+    con.close()
+
+
+def streamlit_to_scanner_save(username,target_url):
+    con=sqlite3.connect(Database_file)
+    c=con.cursor()
+    query=("""INSERT INTO TO_SCANS (USERNAME,TARGET_URL) VALUES (?,?)""")
+    c.execute(query,(username,target_url))
+    con.commit()
+    con.close()

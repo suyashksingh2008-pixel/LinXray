@@ -8,6 +8,29 @@ import sqlite3
 #Page Title
 st.set_page_config(page_title="LinXray", page_icon="assets/logo.png")
 
+#Database Functions for URL queue
+def streamlit_to_scanner_create():
+    con = sqlite3.connect("users.db")
+    c = con.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS TO_SCANS (
+            USERNAME TEXT NOT NULL,
+            TARGET_URL TEXT NOT NULL
+        )
+    """)
+    con.commit()
+    con.close()
+
+def streamlit_to_scanner_save(username, target_url):
+    con = sqlite3.connect("users.db")
+    c = con.cursor()
+    c.execute("INSERT INTO TO_SCANS (USERNAME, TARGET_URL) VALUES (?, ?)", (username, target_url))
+    con.commit()
+    con.close()
+
+# Initialize scan queue table on startup
+streamlit_to_scanner_create()
+
 #Login
 def User_Login():
     """Fetches users from SQLite and guarantees the test user works."""
@@ -101,10 +124,6 @@ if st.session_state.get("authentication_status"):
         [data-testid="stSidebar"] {
             background: linear-gradient(to right, #2C325B, #2C325B00);
         }
-        /* Optional: Ensure text color inside sidebar remains readable on dark gradients */
-        [data-testid="stSidebar"] * {
-            color: #ffffff !important;
-        }
         </style>
         """,
         unsafe_allow_html=True
@@ -113,7 +132,7 @@ if st.session_state.get("authentication_status"):
      # Main page content
      #Sidebar
     authenticator.logout("Logout", "sidebar")
-    st.sidebar.write(f"Welcome, {st.session_state['username']}!")
+    st.sidebar.write(f"Welcome, {st.session_state['name']}!")
 
     # Header
     st.markdown("""
@@ -130,9 +149,20 @@ if st.session_state.get("authentication_status"):
     </div>
     """, unsafe_allow_html=True)
     st.space(30)
-    c1, c2, c3 = st.columns([1, 2, 1])
+    
+    c1, c2, c3 = st.columns([0.5, 3, 0.5])
     with c2:
-        target_url = st.text_input("Enter URL", placeholder="https://example.com", label_visibility="collapsed")
+        with st.form("url_scan_form", clear_on_submit=False):
+            target_url = st.text_input("Enter URL", placeholder="https://example.com", label_visibility="collapsed")
+            submit_scan = st.form_submit_button("Start Scan", use_container_width=True)
+            
+        if submit_scan:
+            if target_url.strip():
+                current_username = st.session_state.get("username")
+                streamlit_to_scanner_save(current_username, target_url)
+                st.success(f"URL submitted for scanning: {target_url}") #Replace this with Loading animation
+            else:
+                st.warning("Please enter a valid URL.")
     
     st.space(20)
     
