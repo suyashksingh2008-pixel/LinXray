@@ -12,12 +12,6 @@ st.set_page_config(page_title="LinXray", page_icon="assets/logo.png")
 def User_Login():
     """Fetches users from SQLite and guarantees the test user works."""
     credentials = {"usernames": {}}
-    
-    # DELETE THIS AFTER, ITS TEMP, PASS IS ATRE1DES
-    credentials["usernames"]["test"] = {
-        "name": "Test User",
-        "password": "$2a$12$AegsROFAPWMvQgNVbLkRK.jYZa/ZWqk.vJFnWMqeVwQJMLBfkgBni"
-    }
 
     # Pull any additional registered users from the database
     try:
@@ -96,6 +90,8 @@ st.markdown(
 # If user is logged in
 if st.session_state.get("authentication_status"):
     #Loading assets
+    with open("assets/Clean_Window.json","r",encoding="utf-8") as f:
+        Clean_window=json.load(f)
     # Left to right Sidebar Gradient
     st.markdown(
         """
