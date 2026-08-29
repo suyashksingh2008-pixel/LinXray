@@ -35,7 +35,6 @@ def User_Login():
         conn.close()
 
         for username, name, password in rows:
-            # Add or override with database users (skipping duplicate 'test' if already seeded)
             credentials["usernames"][username] = {
                 "name": name,
                 "password": password
@@ -69,52 +68,62 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=30
 )
 
-
-#Login Page
+#Login Page state initialization
 if "auth_mode" not in st.session_state:
     st.session_state["auth_mode"] = "Login"
 
-
-#check for login state
+# Custom CSS: Border styling and completely hiding the default built-in form headers
 st.markdown(
     """
     <style>
-    /* Custom border thickness and color for the login box */
+    /* Custom border styling for the login form */
     [data-testid="stForm"] {
         border: 3px solid #b32121 !important;
         border-radius: 12px;
+    }
+    
+    /* Hides the built-in header/title inside the authenticator form */
+    [data-testid="stForm"] h1, 
+    [data-testid="stForm"] h2, 
+    [data-testid="stForm"] h3 {
+        display: none !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
-authenticator.login(location="main")
 
 # If user is logged in
 if st.session_state.get("authentication_status"):
-
-     #Main page content
+     # Main page content
      pass
 
 # If login failed
 elif st.session_state.get("authentication_status") is False:
     st.error("Username/password is incorrect")
-
-# If user is not logged in yet(aka Status None)
-elif st.session_state.get("authentication_status") is None:
+    st.session_state["auth_mode"] = "Login"
+    st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
+    authenticator.login(location="main", key="unique_login_form")
     st.markdown("---")
+    if st.button("Need an account? Sign Up", use_container_width=True):
+        st.session_state["auth_mode"] = "Sign Up"
+        st.rerun()
+
+# If user is not logged in yet (Status is None)
+elif st.session_state.get("authentication_status") is None:
     
+    # Show Login form ONLY when auth_mode is Login
     if st.session_state["auth_mode"] == "Login":
-        if st.button("Need an account? Sign Up", use_container_width=True, type='primary'):
+        st.markdown("<h2 style='text-align: center;'>Login</h2>", unsafe_allow_html=True)
+        authenticator.login(location="main", key="unique_login_form")
+        st.markdown("---")
+        if st.button("Need an account? Sign Up", use_container_width=True):
             st.session_state["auth_mode"] = "Sign Up"
             st.rerun()
             
+    # Show Sign Up form ONLY when auth_mode is Sign Up
     elif st.session_state["auth_mode"] == "Sign Up":
-        if st.button("Already have an account? Login", use_container_width=True):
-            st.session_state["auth_mode"] = "Login"
-            st.rerun()
-            
-        st.subheader("Create a New Account")
+        st.markdown("<h2 style='text-align: center;'>Create a New Account</h2>", unsafe_allow_html=True)
         with st.form("signup_form"):
             new_name = st.text_input("Full Name")
             new_username = st.text_input("Choose Username")
@@ -127,6 +136,11 @@ elif st.session_state.get("authentication_status") is None:
             else:
                 hashed_pw = stauth.Hasher([new_password]).generate()[0]
                 if register_user_in_db(new_username, new_name, hashed_pw):
-                    st.success("Account created! Click Login above to sign in.")
+                    st.success("Account created! Switch back to Login to sign in.")
                 else:
                     st.error("Username already exists or database error.")
+                    
+        st.markdown("---")
+        if st.button("Already have an account? Login", use_container_width=True):
+            st.session_state["auth_mode"] = "Login"
+            st.rerun()
