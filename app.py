@@ -95,8 +95,77 @@ st.markdown(
 
 # If user is logged in
 if st.session_state.get("authentication_status"):
+    #Loading assets
+    # Left to right Sidebar Gradient
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"] {
+            background: linear-gradient(to right, #2C325B, #2C325B07);
+        }
+        /* Optional: Ensure text color inside sidebar remains readable on dark gradients */
+        [data-testid="stSidebar"] * {
+            color: #ffffff !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
      # Main page content
-     pass
+     #Sidebar
+    authenticator.logout("Logout", "sidebar")
+    st.sidebar.write(f"Welcome, *{st.session_state['name']}*!")
+
+    # Header
+    st.markdown("""
+    <div style="text-align: center;">
+        <h1 style="
+            background: linear-gradient(90deg, #ffffff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Orbitron',sans-serif;
+            font-size: 5rem;
+            white-space: nowrap; /* <-- Prevents the text from breaking into two lines */
+            display: inline-block;
+        ">
+            Welcome to LinXray
+        </h1>
+    </div>
+    """, unsafe_allow_html=True)
+    st.space(30)
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        target_url = st.text_input("Enter URL", placeholder="https://example.com", label_visibility="collapsed")
+    
+    st.space(40)
+    
+    # Custom colored and extended divider line
+    st.markdown("""
+        <hr style="
+            border: none;
+            height: 3px;
+            background-color: #b32121;
+            width: 100%;
+            margin: 0 auto;
+        ">
+    """, unsafe_allow_html=True)
+
+    # Scan Results
+    st.space(30)
+    st.markdown("""
+        <div1 style="text-align: center;">
+            <h2 style="
+                background: linear-gradient(90deg,#3366ff, #97026a);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-family: monospace;
+                display: inline-block;
+            ">
+                Your Scan Results will Appear Here
+            </h2>
+        </div1>
+        """, unsafe_allow_html=True)
 
 # If login failed
 elif st.session_state.get("authentication_status") is False:
