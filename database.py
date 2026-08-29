@@ -52,7 +52,7 @@ def get_scan_history():
 
 def get_history():
     n=input('enter user name....')
-    connection=sqlite3.connect(DATABASE_FILE)
+    connection=sqlite3.connect(Database_file)
     cursor=connection.cursor()
     cursor.execute(''' SELECT scan_id,final_url,risk_index,created_at FROM scans WHERE username='{}'
     '''.format(n))
