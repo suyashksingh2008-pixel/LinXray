@@ -1,12 +1,40 @@
 import json
-import time
-import streamlit as st
-import streamlit_authenticator as stauth
-from PIL import Image
+import os
 import sqlite3
+import time
+from PIL import Image
+import streamlit as st
+import streamlit.components.v1 as components
+import streamlit_authenticator as stauth
 
 # Page Title
 st.set_page_config(page_title="LinXray", page_icon="assets/altlogo.png")
+
+# Helper to fetch and read the newest JSON report from the Analysis directory
+def get_latest_analysis_json():
+    analysis_dir = os.path.join(os.path.dirname(__file__), "Analysis")
+    
+    if not os.path.exists(analysis_dir):
+        return None, "Directory 'Analysis' does not exist."
+        
+    json_files = [
+        os.path.join(analysis_dir, f) 
+        for f in os.listdir(analysis_dir) 
+        if f.endswith('.json')
+    ]
+    
+    if not json_files:
+        return None, "No JSON report files found in 'Analysis' directory."
+        
+    # Get the file with the latest modification timestamp
+    latest_file = max(json_files, key=os.path.getmtime)
+    
+    try:
+        with open(latest_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data, None
+    except Exception as e:
+        return None, f"Failed to parse JSON file {os.path.basename(latest_file)}: {e}"
 
 # Database Functions for URL queue
 def streamlit_to_scanner_create():
@@ -105,7 +133,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-#When user loggedin
+# When user logged in
 if st.session_state.get("authentication_status"):
     try:
         Suyash = Image.open("assets/Suyash.png")
@@ -163,7 +191,8 @@ if st.session_state.get("authentication_status"):
             for idx, (logged_url,) in enumerate(history_rows):
                 display_label = logged_url if len(logged_url) < 30 else logged_url[:27] + "..."
                 if st.sidebar.button(display_label, key=f"history_btn_{idx}", use_container_width=True):
-                    st.session_state["target_url_input"] = logged_url
+                    # Re-send target URL to scan queue
+                    streamlit_to_scanner_save(current_username, logged_url)
                     st.session_state["show_results"] = True
                     st.rerun()
         else:
@@ -206,12 +235,35 @@ if st.session_state.get("authentication_status"):
             if target_url.strip():
                 current_username = st.session_state.get("username")
                 streamlit_to_scanner_save(current_username, target_url)
-                st.session_state["show_results"] = True  
+                st.session_state["show_results"] = True
+                st.rerun()
             else:
                 st.warning("Please enter a valid URL.")
 
     # ANALYSIS RESULTS 
     if st.session_state.get("show_results"):
+        # Anchor target for dynamic page scrolling
+        st.markdown('<div id="analysis-results"></div>', unsafe_allow_html=True)
+        
+        # Smooth auto-scroll trigger script with DOM polling
+        components.html(
+            """
+            <script>
+                function scrollToResults() {
+                    var element = window.parent.document.getElementById('analysis-results');
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        setTimeout(scrollToResults, 50);
+                    }
+                }
+                scrollToResults();
+            </script>
+            """,
+            height=0,
+            width=0,
+        )
+
         st.space(20)
         
         st.markdown("""
@@ -230,32 +282,35 @@ if st.session_state.get("authentication_status"):
             <hr style="border: none; height: 1px; background-color: #2E314A; width: 60%; margin: 20px auto;">
         """, unsafe_allow_html=True)
 
-        # Parsed structured data mimicking the JSON pull from database.py
-        scan_results = {
-            "deceptive_elements": "The malicious webpage relies heavily on brand impersonation and dark patterns to deceive the target into believing they are interacting with an official Amazon portal. Observed domain utilizes a `.club` generic top-level domain frequently associated with low-cost infrastructure. Includes spoofed brand logos and fabricated UI section titles.",
-            "phishing_indicators": "The site employs classic social engineering techniques designed to bypass critical thinking through lure-and-urgency mechanics. This includes artificial urgency tactics like dynamic countdown timers, and high-value lure/reward scams offering items like a $1000 Amazon Gift Card in exchange for answering a short survey.",
-            "risk_assessment": {
-                "risk_index": "98/100",
-                "classification": "CRITICAL / HIGH RISK",
-                "recommended_action": "Block access to the top-level domain `.club` or specifically blackhole `rewardinheaven.club` and associated IP infrastructure at the DNS/Secure Web Gateway level."
-            }
-        }
+        # Pull dynamic JSON report from the local Analysis folder
+        scan_results, err = get_latest_analysis_json()
 
-        # Wireframe Layout matching
-        st.markdown("### Deceptive elements:")
-        st.write(scan_results["deceptive_elements"])
-        
-        st.space(20)
+        if err:
+            st.error(f"Analysis pull error: {err}")
+        elif scan_results:
+            # Handle markdown report string format
+            if "analysis_report" in scan_results:
+                if "source_file" in scan_results:
+                    st.caption(f"Source file analyzed: `{scan_results['source_file']}`")
+                st.markdown(scan_results["analysis_report"])
+            
+            # Handle structured JSON format
+            else:
+                st.markdown("### Deceptive elements:")
+                st.write(scan_results.get("deceptive_elements", "No data available."))
+                
+                st.space(20)
 
-        st.markdown("### Phishing & Behavioral Indicators:")
-        st.write(scan_results["phishing_indicators"])
-        
-        st.space(20)
+                st.markdown("### Phishing & Behavioral Indicators:")
+                st.write(scan_results.get("phishing_indicators", "No data available."))
+                
+                st.space(20)
 
-        st.markdown("### Final Risk Assessment:")
-        st.markdown(f"Risk Index : {scan_results['risk_assessment']['risk_index']}")
-        st.markdown(f"Threat Classification : {scan_results['risk_assessment']['classification']}")
-        st.markdown(f"Recommended Action : {scan_results['risk_assessment']['recommended_action']}")
+                risk = scan_results.get("risk_assessment", {})
+                st.markdown("### Final Risk Assessment:")
+                st.markdown(f"Risk Index : {risk.get('risk_index', 'N/A')}")
+                st.markdown(f"Threat Classification : {risk.get('classification', 'N/A')}")
+                st.markdown(f"Recommended Action : {risk.get('recommended_action', 'N/A')}")
 
     st.space(40)
 
