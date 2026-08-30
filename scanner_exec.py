@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from typing import Optional
 import argparse
+from validation import safe_username
 
 from playwright.sync_api import(Browser, BrowserContext, Locator, Page, TimeoutError as PlaywrightTimeoutError, sync_playwright)
 
@@ -12,7 +13,7 @@ AFTER_CLICK_WAIT_MS = 2_000
 MAX_BUTTONS_TO_CLICK = 10
 SCREENSHOT_TIMEOUT_MS = 30_000
 
-BUTTON_SELECTOR = "button, input[type='button], [role='button], a[href]"
+BUTTON_SELECTOR = "button, input[type='button'], [role='button'], a[href]"
 EXAMINE_BUTTON_PHRASES = {
     "contact us",
     "view product",
@@ -68,7 +69,7 @@ BLOCKED_BUTTON_PHRASES = {
 def clean_text(text: Optional[str]) -> str:
     if not text:
         return ""
-    return re.sub(r"\s+", "", text).strip().lower()
+    return re.sub(r"\s+", " ", text).strip().lower()
 
 def safe_filename(text: str) -> str:
     cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", text).strip("_").lower()
@@ -92,7 +93,7 @@ def get_button_label(button: Locator) -> str:
             return candidate.strip()
     return "Unnamed button"
 
-def get_button_type(button: Locator) -> tuple[bool, str, str]:
+def get_button_type(button: Locator) -> str:
     try:
         button_type = button.get_attribute("type")
     except Exception:
@@ -113,14 +114,13 @@ def classify_button(button: Locator) -> tuple[bool, str, str]:
         href = button.get_attribute("href")
     except Exception:
         href = None
-    if href:
-        cleaned_href = href.strip().lower()
+    cleaned_href = (href.strip().lower() if href else "")
+
     if cleaned_href.startswith(("mailto:", "tel:", "javascript:")):
-        return (False, label, "Blocked non-web link")
-    if any(phrase in cleaned_label for phrase in BLOCKED_BUTTON_PHRASES):
-        return (False, label, "Label contains a blocked action")
-    if any(phrase in cleaned_label for phrase in BLOCKED_BUTTON_PHRASES):
-            return (False, label, "Label is not in the informational allow-list")
+        if any(phrase in cleaned_label for phrase in BLOCKED_BUTTON_PHRASES):
+            return (False, label, "Label contains a blocked action")
+        if not any(phrase in cleaned_label for phrase in EXAMINE_BUTTON_PHRASES):
+            return (False, label, "Label is not in the examination list")
 
     return (True, label, "Label has informational action")
 
@@ -178,7 +178,7 @@ def collect_button_candidates(page: Page) -> list[dict]:
 
     return candidates
 
-def test_button(browser: Browser, target_url: str, button_information: dict, action_number: int, evidence_folder: Path) -> dict:
+def test_button(browser: Browser, target_url: str, button_information: dict, action_number: int, evidence_folder: Path, scan_id: str) -> dict:
     context = configure_context(browser)
     page = context.new_page()
     prepare_page(page)
@@ -262,9 +262,13 @@ def test_button(browser: Browser, target_url: str, button_information: dict, act
 
     return action_result
 
-def scan_website(target_url: str, scan_id: str, output_root: str) -> Path:
-   evidence_folder = output_root / scan_id
+def scan_website(target_url: str, scan_id: str, output_root: Path, username: str) -> Path:
+
+   username = safe_username(username)
+
+   evidence_folder = output_root / username
    evidence_folder.mkdir(parents=True, exist_ok=True)
+   
 
    actions = []
 
@@ -279,7 +283,7 @@ def scan_website(target_url: str, scan_id: str, output_root: str) -> Path:
             initial_page.goto(target_url, wait_until="domcontentloaded", timeout=PAGE_TIMEOUT_MS)
             initial_page.wait_for_timeout(2_000)
 
-            capture_screenshot(initial_page, evidence_folder / "initial.png")
+            capture_screenshot(initial_page,evidence_folder / f"{scan_id}_initial.png")
 
             button_candidates = collect_button_candidates(initial_page)
 
@@ -293,15 +297,15 @@ def scan_website(target_url: str, scan_id: str, output_root: str) -> Path:
        permitted_buttons = permitted_buttons[:MAX_BUTTONS_TO_CLICK]
 
        for action_number, button_information in enumerate(permitted_buttons, start= 1):
-           result = test_button(browser=browser, target_url=target_url, button_information=button_information, action_number=action_number, evidence_folder=evidence_folder)
-           actions.append()
+           result = test_button(browser=browser, target_url=target_url, button_information=button_information, action_number=action_number, evidence_folder=evidence_folder, scan_id=scan_id)
+           actions.append(result)
 
        browser.close()
 
    skipped_buttons = [candidate for candidate in button_candidates if not candidate["permitted"]]
 
-   action_record = {"scan_id": scan_id, "target_url": target_url, "maximum_actions": MAX_BUTTONS_TO_CLICK, "buttons_found": len(button_candidates), "buttons_tested": len(actions), "actions": actions, "skipped_buttons": skipped_buttons}
-   actions_record_path = (evidence_folder / "actions_exec.json")
+   action_record = {"scan_id": scan_id, "target_url": target_url, "maximum_actions": MAX_BUTTONS_TO_CLICK, "buttons_found": len(button_candidates), "buttons_tested": len(actions), "actions": actions, "skipped_buttons": skipped_buttons, "username": username}
+   actions_record_path = (evidence_folder / f"{scan_id}_actions_exec.json")
    actions_record_path.write_text(json.dumps(action_record,indent=4), encoding="utf-8")
 
    return evidence_folder
@@ -312,8 +316,9 @@ def get_arguments() -> argparse.Namespace:
     parser.add_argument("--url", required=True, help="URL to investigate")
     parser.add_argument("--scan-id", required=True, help="Unique scan_id for every scan")
     parser.add_argument("--output", required=True, help="Root output directory inside Docker")
+    parser.add_argument("--username", required=True, help="Username that owns the scan")
 
-    return parser.parse_args
+    return parser.parse_args()
 
 def main() -> None:
     arguments = get_arguments()
@@ -321,15 +326,15 @@ def main() -> None:
     print(f"Starting scan: {arguments.scan_id}")
     print(f"Target URL: {arguments.url}")
 
-    evidence_folder = scan_website(target_url=arguments.url, scan_id=arguments.scan_id, output_root=Path(arguments.output))
+    evidence_folder = scan_website(target_url=arguments.url, scan_id=arguments.scan_id, output_root=Path(arguments.output), username=arguments.username)
     if not evidence_folder.exists():
         raise RuntimeError("Evidence folder is not created by the scanner")
     
     screenshots = sorted(evidence_folder.glob("*.png"))
-    if not screenshots():
+    if not screenshots:
         raise RuntimeError("Screenshots have not been clicked by the scanner")
 
-    actions_path = (evidence_folder / "actions_exec.json")
+    actions_path = (evidence_folder / f"{arguments.scan_id}_actions_exec.json")
     if not actions_path.exists():
         raise RuntimeError("actions_exec.json file has not been formed")
 
@@ -341,8 +346,8 @@ def main() -> None:
     print("Scan completed successfully")
     print(f"Evidence folder: {evidence_folder}")
     print(f"Screenshots: {len(screenshots)}")
-    print(f"Buttons found: {actions_data.get("buttons_found", 0)}")
-    print(f"Buttons tested: {actions_data.get("buttons_tested", 0)}")
+    print(f"Buttons found:"f"{actions_data.get("buttons_found", 0)}")
+    print(f"Buttons tested:"f"{actions_data.get("buttons_tested", 0)}")
 
 if __name__ == "__main__":
     main()    

@@ -3,22 +3,22 @@ import subprocess
 from pathlib import Path
 from urllib.parse import urlparse
 from uuid import uuid4
-import sqlite3
+from config import DATABASE_FILE
+from database import (
+    fetch_pending_scan,
+    mark_scan_completed,
+    mark_scan_failed,
+    mark_scan_processing,
+)
+
+from validation import (
+    safe_username,
+    validate_url,
+)
 
 DOCKER_IMAGE = "linxray-dispscanner:latest"
 
 SCAN_TIMEOUT_TIME = 360
-
-
-def fetch_target_url():
-    name=input('enter username...')
-    con=sqlite3.connect(Database_file)
-    query=('''SELECT TARGET_URL FROM TO_SCANS WHERE USERNAME='{}'
-'''.format(name))
-    c=con.cursor()
-    return c.execute(query).fetchall()
-
-
 
 def validate_basic_url(target_url: str) -> str:
     target_url = target_url.strip()
@@ -32,17 +32,15 @@ def validate_basic_url(target_url: str) -> str:
     return target_url
 
 
-def run_scan(target_url: str, output_root: Path = Path("evidence_folder")) -> Path:
+def run_scan(target_url: str, username: str, scan_id: str, output_root: Path = Path("evidence_folder")) -> Path:
     target_url = validate_basic_url(target_url)
-
-    scan_id = str(uuid4())
+    username = safe_username(username)
 
     output_root.mkdir(parents=True, exist_ok=True)
     output_root = output_root.resolve()
-    analyze_ss.mkdir(parents=True, exist_ok=True)
-    analyze_ss = analyze_ss.resolve()
 
-    host_evidence_folder = (output_root / analyze_ss)
+    host_evidence_folder = output_root / username
+    host_evidence_folder.mkdir(parents=True, exist_ok=True)
 
     command = ["docker",
             "run",
@@ -85,6 +83,9 @@ def run_scan(target_url: str, output_root: Path = Path("evidence_folder")) -> Pa
             # Arguments received by scanner_entry.py
             "--url",
             target_url,
+
+            "--username",
+            username,
     
             "--scan-id",
             scan_id,
@@ -98,6 +99,8 @@ def run_scan(target_url: str, output_root: Path = Path("evidence_folder")) -> Pa
     try:
         result = subprocess.run(command, check=True, capture_output=True, text=True, timeout=SCAN_TIMEOUT_TIME)
     except FileNotFoundError as error:
+        raise RuntimeError("Docker was not found or is not running") from error
+    except subprocess.TimeoutExpired as error:
         raise RuntimeError("The scanner exceeded the allowed runtime of "f"{SCAN_TIMEOUT_TIME} seconds") from error
     except subprocess.CalledProcessError as error:
         error_message = (error.stderr.strip() or error.stdout.strip() or "The Docker scanner failed")
@@ -112,7 +115,7 @@ def run_scan(target_url: str, output_root: Path = Path("evidence_folder")) -> Pa
     if not screenshots:
         raise RuntimeError("Docker completed, but no screenshots were created")
 
-    actions_path = (host_evidence_folder / "actions_exec.json")
+    actions_path = (host_evidence_folder / f"{scan_id}_actions_exec.json")
 
     if not actions_path.exists():
         raise RuntimeError("Docker completed, but no actions file was created")
@@ -128,22 +131,50 @@ def run_scan(target_url: str, output_root: Path = Path("evidence_folder")) -> Pa
     return host_evidence_folder
 
 
-def main() -> None:
-    test_url = input("Enter the URL to scan: ").strip()
+def main() -> tuple[str, Path] | None:
+    scan_request = fetch_pending_scan()
+
+    if scan_request is None:
+        print("No pending scan found")
+        return None
+
+    username, target_url = scan_request
+    scan_id = str(uuid4())
+
+    mark_scan_processing(
+        username=username,
+        scan_id=scan_id,
+    )
 
     try:
-        evidence_folder = run_scan(test_url, output_root= Path("evidence_folder"))
-        print("\nTesting completed successfully")
-        print(f"Evidence folder:\n"f"{evidence_folder}")
+        user_folder = run_scan(
+            target_url=target_url,
+            username=username,
+            scan_id=scan_id,
+            output_root=Path("evidence"),
+        )
 
-        print("\nCreated files:")
+        mark_scan_completed(
+            scan_id=scan_id,
+            output_folder=str(user_folder),
+        )
 
-        for file_path in sorted(evidence_folder.iterdir()):
-            print(f"- {file_path.name}")
+        print("\nScan completed successfully")
+        print(f"Scan ID: {scan_id}")
+        print(f"User folder: {user_folder}")
+
+        return scan_id, user_folder
 
     except Exception as error:
-        print("\nTesting failed")
+        mark_scan_failed(
+            scan_id=scan_id,
+            error_message=str(error),
+        )
+
+        print("\nScan failed")
         print(error)
+
+        return None
 
 
 if __name__ == "__main__":
