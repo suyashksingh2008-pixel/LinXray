@@ -131,10 +131,32 @@ if st.session_state.get("authentication_status"):
         """,
         unsafe_allow_html=True
     )
+
+    # Sidebar buttons coloured
+    st.sidebar.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"] .stButton button {
+            background-color: #1A1D36;
+            color: #ffffff;
+            border: 2px solid #3F4464;
+            border-radius: 8px;
+        }
+        [data-testid="stSidebar"] .stButton button:hover {
+            background-color: #2C325B;
+            border-color: #b32121;
+            color: #00FFE5;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     
     # Main page content
+    
     # Sidebar
     authenticator.logout("Logout", "sidebar")
+    st.sidebar.space(10)
     st.sidebar.write(f"Welcome, {st.session_state.get('name', 'User')}!")
     
     # --- SIDEBAR HISTORY FEATURE ---
