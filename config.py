@@ -1,6 +1,6 @@
 from pathlib import Path
-Evidence_folder=path('evidences')
-Report_Folder=path('reports')
+Evidence_folder=Path('evidences')
+Report_Folder=Path('reports')
 Database_file='scan_history.db'
 MAX_REDIRECTS=10
 MAX_ACTIONS=10
