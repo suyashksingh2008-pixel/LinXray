@@ -5,7 +5,7 @@ from PIL import Image
 import sqlite3
 
 # Page Title
-st.set_page_config(page_title="LinXray", page_icon="assets/logo.png")
+st.set_page_config(page_title="LinXray", page_icon="assets/altlogo.png")
 
 # Database Functions for URL queue
 def streamlit_to_scanner_create():
