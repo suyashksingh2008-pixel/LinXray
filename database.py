@@ -1,90 +1,59 @@
 import json
 import sqlite3
-from config import Database_file
+from config import DATABASE_FILE
 def create_database():
-    con=sqlite3.connect(Database_file)
+    con = sqlite3.connect(DATABASE_FILE)
     c=con.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS SCANS (
-    USERNAME TEXT NOT NULL
-    SCAN_ID TEXT PRIMARY KEY,
-    TARGET_URL TEXT NOT NULL,
-    FINAL_URL TEXT,
-    STATUS TEXT NOT NULL,
-    RISK_INDEX INT,
-    RISK_LEVEL TEXT,
-    CREATED_AT DEFAULT CURRENT_TIMESTAMP,
-    REPORT_JSON TEXT
-    )
-''')
+    c.execute(''' CREATE TABLE  IF NOT EXISTS scans(
+     
+    scan_id TEXT PRIMARY KEY,
+    submitted_url TEXT NOT NULL,
+    final_url TEXT,
+    status TEXT NOT NULL,
+    risk_index INTEGER,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    report_json TEXT
+    )''')
     con.commit()
     con.close()
+
+    #Users database
+    usr=sqlite3.connect('users.db')
+    cc=usr.cursor()
+    cc.execute('''CREATE TABLE IF NOT EXISTS users(
+    username TEXT PRIMARY KEY,
+    name TEXT,
+    password TEXT )''')
+    usr.commit()
+    usr.close()
 
 def save_scan(report):
-    con=sqlite3.connect(Database_file)
+    con=sqlite3.connect(DATABASE_FILE)
     c=con.cursor()
-    query=("""
-    INSERT INTO SCANS (
-        USERNAME, SCAN_ID, TARGET_URL, FINAL_URL, STATUS,
-        RISK_INDEX, RISK_LEVEL, CREATED_AT, REPORT_JSON
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """)
-   
-    c.execute(query,report.username,
-                report.scan_id,
-                report.target_url,
-                report.final_url,
-                report.status,
-                report.risk_index,
-                report.risk_level,
-                report.created_at,
-                json.dumps(report.report_json))
+    c.execute('''
+    INSERT INTO scans (scan_id, submitted_url, final_url, status, 
+    risk_index, risk_level, model_dump_json) 
+    VALUES('{}','{}','{}','{}',{},'{}','{}')'''.format(report.scan_id,
+    report.submitted_url,
+    report.final_url,
+    report.status,
+    report.risk_index,
+    report.risk_level,
+    report.model_dump_json()))
     con.commit()
     con.close()
 
-
 def get_scan_history():
-    con=sqlite3.connect(Database_file)
+    con=sqlite3.connect(DATABASE_FILE)
     c=con.cursor()
-    name=input('enter the username....')
-    c.execute("SELECT * FROM SCANS WHERE USERNAME='{}'".format(name))
-    rows=c.fetchall()
+    rows = c.execute('''SELECT * FROM scans ORDER BY created_at DESC''').fetchall()
+
     con.close()
     return rows
 
-def get_history():
-    n=input('enter user name....')
-    connection=sqlite3.connect(Database_file)
-    cursor=connection.cursor()
-    cursor.execute(''' SELECT scan_id,final_url,risk_index,created_at FROM scans WHERE username='{}'
-    '''.format(n))
-    a=cursor.fetchall()
-    connection.close()
-    return a
-def streamlit_to_scanner_create():
-    con=sqlite3.connect(Database_file)
-    c=con.cursor()
-    query=("""CREATE TABLE IF NOT EXISTS TO_SCANS (
-    USERNAME TEXT NOT NULL,
-    TARGET_URL TEXT NOT NULL)""")
-    c.execute(query)
-    con.commit()
-    con.close()
-
-
-def streamlit_to_scanner_save(username,target_url):
-    con=sqlite3.connect(Database_file)
-    c=con.cursor()
-    query=("""INSERT INTO TO_SCANS (USERNAME,TARGET_URL) VALUES (?,?)""")
-    c.execute(query,(username,target_url))
-    con.commit()
-    con.close()
-
-import sqlite3
-
-DATABASE_FILE = "users.db"
-
 
 def fetch_pending_scan():
+    streamlit_to_scanner_create()
     with sqlite3.connect(DATABASE_FILE) as connection:
         cursor = connection.cursor()
 
@@ -98,7 +67,6 @@ def fetch_pending_scan():
         )
 
         return cursor.fetchone()
-
 def mark_scan_processing(
     username: str,
     scan_id: str,
@@ -114,6 +82,29 @@ def mark_scan_processing(
             """,
             (scan_id, username),
         )
+def streamlit_to_scanner_create():
+    con=sqlite3.connect(DATABASE_FILE)
+    c=con.cursor()
+    query=("""CREATE TABLE IF NOT EXISTS TO_SCANS (
+        USERNAME TEXT NOT NULL,
+        TARGET_URL TEXT NOT NULL,
+        SCAN_ID TEXT,
+        STATUS TEXT DEFAULT 'pending',
+        OUTPUT_FOLDER TEXT,
+        ERROR_MESSAGE TEXT)""")
+    c.execute(query)
+    con.commit()
+    con.close()
+
+
+def streamlit_to_scanner_save(username,target_url):
+    con=sqlite3.connect(DATABASE_FILE)
+    c=con.cursor()
+    query=("""INSERT INTO TO_SCANS (USERNAME,TARGET_URL) VALUES (?,?)""")
+    c.execute(query,(username,target_url))
+    con.commit()
+    con.close()
+
 
 def mark_scan_completed(
     scan_id: str,
