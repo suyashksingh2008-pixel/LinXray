@@ -12,9 +12,10 @@ from reka.client import Reka
 #  CONFIGURATION & API KEYS
 
 
-
+# Enter your own 3 api keys
 
 # Directories
+# For watch folder change to your own path
 WATCH_FOLDER = r"C:\Users\l0stf\OneDrive\Desktop"
 SAVE_FOLDER = os.path.join(WATCH_FOLDER, "newz")
 
