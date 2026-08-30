@@ -1,0 +1,105 @@
+{
+    "scan_id": "096ec959-cd50-414c-b0f2-1369ec6d5b22",
+    "target_url": "https://hyeonseok067.gitbuh.io/Netflix",
+    "maximum_actions": 10,
+    "buttons_found": 13,
+    "buttons_tested": 4,
+    "actions": [
+        {
+            "action_number": 1,
+            "button_label": "About Us",
+            "status": "completed",
+            "url_before": "https://hyeonseok067.gitbuh.io/Netflix",
+            "url_after": "https://adorarama.com/about-us.php",
+            "before_screenshot": "action_01_about_us_before.png",
+            "after_screenshot": "action_01_about_us_after.png",
+            "error": null
+        },
+        {
+            "action_number": 2,
+            "button_label": "Contact Us",
+            "status": "failed",
+            "url_before": "https://hyeonseok067.gitbuh.io/Netflix",
+            "url_after": null,
+            "before_screenshot": "action_02_contact_us_before.png",
+            "after_screenshot": null,
+            "error": "Page.screenshot: Timeout 5000ms exceeded.\nCall log:\n  - taking page screenshot\n  - waiting for fonts to load...\n  - fonts loaded\n"
+        },
+        {
+            "action_number": 3,
+            "button_label": "Privacy Policy",
+            "status": "completed",
+            "url_before": "https://hyeonseok067.gitbuh.io/Netflix",
+            "url_after": "https://adorarama.com/privacy-policy.php",
+            "before_screenshot": "action_03_privacy_policy_before.png",
+            "after_screenshot": "action_03_privacy_policy_after.png",
+            "error": null
+        },
+        {
+            "action_number": 4,
+            "button_label": "Terms of Service",
+            "status": "completed",
+            "url_before": "https://hyeonseok067.gitbuh.io/Netflix",
+            "url_after": "https://adorarama.com/terms-of-service.php",
+            "before_screenshot": "action_04_terms_of_service_before.png",
+            "after_screenshot": "action_04_terms_of_service_after.png",
+            "error": null
+        }
+    ],
+    "skipped_buttons": [
+        {
+            "original_index": 0,
+            "label": "Events and Attractions",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 1,
+            "label": "Television",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 2,
+            "label": "Music and Audio",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 3,
+            "label": "Technology & Computing",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 4,
+            "label": "Hobbies & Interests",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 5,
+            "label": "Automotive",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 6,
+            "label": "Communication",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 7,
+            "label": "Shopping",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        },
+        {
+            "original_index": 8,
+            "label": "Education",
+            "permitted": false,
+            "reason": "Blocked non-web link"
+        }
+    ]
+}
