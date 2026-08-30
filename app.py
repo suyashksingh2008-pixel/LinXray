@@ -206,7 +206,7 @@ if st.session_state.get("authentication_status"):
             <hr style="
                 border: none;
                 height: 3px;
-                background-color: #3F4464;
+                background-color: #2E314A;
                 width: 110%;
                 margin-left: -10%;
                 margin-top: 20px;
