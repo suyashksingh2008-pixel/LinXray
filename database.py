@@ -79,3 +79,68 @@ def streamlit_to_scanner_save(username,target_url):
     con.commit()
     con.close()
 
+import sqlite3
+
+DATABASE_FILE = "users.db"
+
+
+def fetch_pending_scan():
+    with sqlite3.connect(DATABASE_FILE) as connection:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            """
+            SELECT USERNAME, TARGET_URL
+            FROM TO_SCANS
+            WHERE STATUS = 'pending'
+            LIMIT 1
+            """
+        )
+
+        return cursor.fetchone()
+
+def mark_scan_processing(
+    username: str,
+    scan_id: str,
+) -> None:
+    with sqlite3.connect(DATABASE_FILE) as connection:
+        connection.execute(
+            """
+            UPDATE TO_SCANS
+            SET SCAN_ID = ?,
+                STATUS = 'processing'
+            WHERE USERNAME = ?
+              AND STATUS = 'pending'
+            """,
+            (scan_id, username),
+        )
+
+def mark_scan_completed(
+    scan_id: str,
+    output_folder: str,
+) -> None:
+    with sqlite3.connect(DATABASE_FILE) as connection:
+        connection.execute(
+            """
+            UPDATE TO_SCANS
+            SET OUTPUT_FOLDER = ?,
+                STATUS = 'completed'
+            WHERE SCAN_ID = ?
+            """,
+            (output_folder, scan_id),
+        )
+
+def mark_scan_failed(
+    scan_id: str,
+    error_message: str,
+) -> None:
+    with sqlite3.connect(DATABASE_FILE) as connection:
+        connection.execute(
+            """
+            UPDATE TO_SCANS
+            SET STATUS = 'failed',
+                ERROR_MESSAGE = ?
+            WHERE SCAN_ID = ?
+            """,
+            (error_message, scan_id),
+        )
