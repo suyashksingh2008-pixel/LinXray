@@ -87,7 +87,7 @@ authenticator = stauth.Authenticate(
 if "auth_mode" not in st.session_state:
     st.session_state["auth_mode"] = "Login"
 
-# Custom CSS: Border styling and completely hiding the default built-in form headers
+# Border for url form
 st.markdown(
     """
     <style>
@@ -105,7 +105,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- IF USER IS LOGGED IN ---
+#When user loggedin
 if st.session_state.get("authentication_status"):
     try:
         Suyash = Image.open("assets/Suyash.png")
@@ -120,7 +120,7 @@ if st.session_state.get("authentication_status"):
         """
         <style>
         [data-testid="stSidebar"] {
-            background: linear-gradient(to right, #2C325B, #2C325B00);
+            background: linear-gradient(to right, #2C325B, #2C325B10);
         }
         [data-testid="stSidebar"] .stButton button {
             background-color: #1A1D36;
@@ -142,7 +142,7 @@ if st.session_state.get("authentication_status"):
     authenticator.logout("Logout", "sidebar")
     st.sidebar.space(10)
     st.sidebar.write(f"Welcome, {st.session_state.get('name', 'User')}!")
-    
+        
     st.sidebar.markdown("---")
     st.sidebar.markdown("History")
     
@@ -174,12 +174,12 @@ if st.session_state.get("authentication_status"):
     # Header
     st.markdown("""
     <div style="text-align: center; width: 100%;">
-        <h1 style="font-family: 'Orbitron', sans-serif; font-size: 4rem; display: block; width: 100%; margin: 0 auto;">
+        <h1 style="font-family: 'Orbitron', sans-serif; font-size: 6rem; display: block; width: 100%; margin: 0 auto;">
         Welcome to LinXray
         </h1>
     </div>
     """, unsafe_allow_html=True)
-    
+    st.space(30)
     st.markdown("""
         <hr style="
             border: none;
@@ -191,7 +191,7 @@ if st.session_state.get("authentication_status"):
             margin-bottom: 20px;
         ">
     """, unsafe_allow_html=True)
-    st.space(30)
+    st.space(60)
     
     if "show_results" not in st.session_state:
         st.session_state["show_results"] = False
@@ -204,13 +204,6 @@ if st.session_state.get("authentication_status"):
             
         if submit_scan:
             if target_url.strip():
-                # Loading bar implementation based on wireframe
-                progress_bar = st.progress(0)
-                for percent_complete in range(100):
-                    time.sleep(0.01) # Simulate scanning delay
-                    progress_bar.progress(percent_complete + 1)
-                progress_bar.empty()
-
                 current_username = st.session_state.get("username")
                 streamlit_to_scanner_save(current_username, target_url)
                 st.session_state["show_results"] = True  
@@ -266,15 +259,13 @@ if st.session_state.get("authentication_status"):
 
     st.space(40)
 
-    # ====================================================
     # MEET THE TEAM SECTION (ALWAYS VISIBLE WHEN LOGGED IN)
-    # ====================================================
-    
+    st.space(5)
     st.markdown("""
         <hr style="
             border: none;
             height: 3px;
-            background-color: #b32121;
+            background-color: #2E314A;
             width: 150%;
             margin-left: -25%;
             margin-top: 20px;
