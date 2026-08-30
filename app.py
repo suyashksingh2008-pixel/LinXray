@@ -390,13 +390,27 @@ if st.session_state.get("authentication_status"):
             </h1>
         </div>
         """, unsafe_allow_html=True)
+    st.markdown("""
+                    <hr style="
+                        border: none;
+                        height: 3px;
+                        background-color: #2E314A;
+                        width: 100%;
+                        margin-left: 0%;
+                        margin-top: 20px;
+                        margin-bottom: 20px;
+                    ">
+                """, unsafe_allow_html=True)
         
     cl11, space1, cl12 = st.columns([2, 2.5, 3])
     with cl11:
         # Note: Wrapped in try-except earlier so this doesn't crash if files are missing
         if 'Suyash' in locals(): st.image(Suyash)
+        st.write("---")
         if 'Jonathan' in locals(): st.image(Jonathan)
+        st.write("---")
         if 'Ayush' in locals(): st.image(Ayush)
+        st.write("---")
         if 'Gauresh' in locals(): st.image(Gauresh)
         
     with cl12:
@@ -412,7 +426,9 @@ if st.session_state.get("authentication_status"):
                         <span style="font-size: 1.1rem; color: inherit;">Database Management</span>
                     </div>
                 """, unsafe_allow_html=True)
-        st.space(85)
+        st.space(35)
+        st.write("---")
+        st.space(5)
         st.markdown("""
             <div style="display:flex; align-items:baseline;gap:15px;flex-wrap:wrap;margin-top:10px;">
                 <h3 style="white-space: nowrap; margin: 0; font-size: 1.5rem;">
@@ -424,7 +440,9 @@ if st.session_state.get("authentication_status"):
                 <span style="font-size: 1.1rem; color: inherit;">Virtual Environment Testing and Isolation</span>
             </div>
         """, unsafe_allow_html=True)
-        st.space(57)
+        st.space(20)
+        st.write("---")
+        st.space(5)
         st.markdown("""
                     <div style="display:flex; align-items:baseline;gap:15px;flex-wrap:wrap;margin-top:10px;">
                         <h3 style="white-space: nowrap; margin: 0; font-size: 1.5rem;">
@@ -436,6 +454,8 @@ if st.session_state.get("authentication_status"):
                         <span style="font-size: 1.1rem; color: inherit;">Threat Intelligence System</span>
                     </div>
                 """, unsafe_allow_html=True)
+        st.space(45)
+        st.write("---")
         st.space(60)
         st.markdown("""
                             <div style="display:flex; align-items:baseline;gap:15px;flex-wrap:wrap;margin-top:10px;">
@@ -448,6 +468,7 @@ if st.session_state.get("authentication_status"):
                                 <span style="font-size: 1.1rem; color: inherit;">UI/UX & Front End</span>
                             </div>
                         """, unsafe_allow_html=True)
+    st.write("---")
 
 # --- IF LOGIN FAILED ---
 elif st.session_state.get("authentication_status") is False:
