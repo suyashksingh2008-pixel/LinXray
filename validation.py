@@ -1,5 +1,6 @@
 import ipaddress 
-import socket 
+import socket
+import re 
 from urllib.parse import urlparse as parse
 from config import ALLOWED_SCHEMES
 
@@ -31,4 +32,20 @@ def validate_url(target_url):
             raise ValueError('restricted network address')
     return target_url
 
+import re
+
+
+def safe_username(username: str) -> str:
+    username = username.strip().lower()
+
+    safe_name = re.sub(
+        r"[^a-zA-Z0-9_-]+",
+        "_",
+        username,
+    ).strip("_")
+
+    if not safe_name:
+        raise ValueError("Invalid username")
+
+    return safe_name[:50]
     
