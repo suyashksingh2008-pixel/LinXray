@@ -136,6 +136,37 @@ if st.session_state.get("authentication_status"):
     # Sidebar
     authenticator.logout("Logout", "sidebar")
     st.sidebar.write(f"Welcome, {st.session_state.get('name', 'User')}!")
+    
+    # --- SIDEBAR HISTORY FEATURE ---
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("History")
+    
+    current_username = st.session_state.get("username")
+    try:
+        conn = sqlite3.connect("users.db")
+        cursor = conn.cursor()
+        # Fetch unique target URLs, sorted by the most recent occurrence
+        cursor.execute("""
+            SELECT TARGET_URL FROM TO_SCANS 
+            WHERE USERNAME = ? 
+            GROUP BY TARGET_URL 
+            ORDER BY MAX(rowid) DESC LIMIT 10
+        """, (current_username,))
+        history_rows = cursor.fetchall()
+        conn.close()
+        
+        if history_rows:
+            for idx, (logged_url,) in enumerate(history_rows):
+                # Truncate long URLs for display
+                display_label = logged_url if len(logged_url) < 30 else logged_url[:27] + "..."
+                if st.sidebar.button(display_label, key=f"history_btn_{idx}", use_container_width=True):
+                    st.session_state["target_url_input"] = logged_url
+                    st.session_state["show_results"] = True
+                    st.rerun()
+        else:
+            st.sidebar.caption("No search history yet.")
+    except Exception as e:
+        st.sidebar.caption("Could not load history.")
 
     # Header
     st.markdown("""
@@ -151,6 +182,18 @@ if st.session_state.get("authentication_status"):
         </h1>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("""
+                <hr style="
+                    border: none;
+                    height: 3px;
+                    background-color: #2E314A;
+                    width: 130%;
+                    margin-left: -20%;
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+                ">
+            """, unsafe_allow_html=True)
     st.space(30)
     
     # Initialize the results visibility flag in session state if not present
